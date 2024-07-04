@@ -186,7 +186,7 @@ export default function ExpenseListScreen() {
     setAmountError('');
   };
 
-  const renderItem = { item } (
+  const renderItem = ({ item }) => (
     <TouchableOpacity onLongPress={() => handleLongPress(item)}>
       <View style={[styles.expenseItem, item.isPaid && styles.paidExpense]}>
         <View>

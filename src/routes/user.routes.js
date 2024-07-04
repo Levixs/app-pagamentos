@@ -4,7 +4,6 @@ import ExpenseListScreen from '../pages/Home'
 
 export default function UserRoutes() {
   return (
-        <ExpenseListScreen/>    
-
+    <ExpenseListScreen/>    
   )
 }
