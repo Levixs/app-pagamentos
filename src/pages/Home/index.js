@@ -110,24 +110,34 @@ export default function ExpenseListScreen() {
   };
 
   const handleValorChange = (value) => {
-    const numericValue = value.replace(/\D/g, "");
-    const sanitizedValue = parseInt(numericValue) / 100;
-    const formattedValue = sanitizedValue.toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL",
+    const numericValue = value.replace(/[^\d,]/g, "");
+
+    const sanitizedValue = (
+      parseInt(numericValue.replace(",", ""), 10) / 100
+    ).toFixed(2);
+
+    const formattedValue = Number(sanitizedValue).toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     });
-    setAmount(formattedValue);
+
+    setAmount(formattedValue.replace(".", ","));
   };
 
   const handleAddExpense = () => {
     if (!validateForm()) {
       return;
     }
+    const cleanedAmount = amount.replace(/[^\d,]/g, "").replace(",", ".");
+    const numericAmount = parseFloat(cleanedAmount);
 
-    const numericAmount = parseFloat(
-      amount.replace(/[^\d,]/g, "").replace(",", ".")
-    );
-    const formattedAmount = numericAmount.toFixed(2);
+    if (isNaN(numericAmount)) {
+      setAmountError("O valor deve ser um número válido");
+      return;
+    }
+
+    const formattedAmount = numericAmount.toFixed(2).replace(".", ",");
+
     const formattedDueDate = moment(dueDate).format("DD/MM/YYYY");
 
     if (isEditing && selectedExpense) {
@@ -165,7 +175,14 @@ export default function ExpenseListScreen() {
   const editExpense = () => {
     if (selectedExpense) {
       setName(selectedExpense.name);
-      setAmount(selectedExpense.amount);
+      setAmount(
+        parseFloat(selectedExpense.amount.replace(",", "."))
+          .toLocaleString("pt-BR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+          .replace(".", ",")
+      );
       setDueDate(moment(selectedExpense.dueDate, "DD/MM/YYYY").toDate());
       setRepeat(selectedExpense.repeat);
       setIsEditing(true);
@@ -338,9 +355,6 @@ export default function ExpenseListScreen() {
                 onPress={() => setShowDatePicker(true)}
                 style={styles.datePickerButton}
               >
-                {/* <Text style={styles.datePickerText}>
-                  {moment(dueDate).format("DD/MM/YYYY")}
-                </Text> */}
                 <RNDateTimePicker
                   style={styles.datePicker}
                   value={dueDate}
